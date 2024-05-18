@@ -1,18 +1,27 @@
 #pragma once
 
+#include "bitset-reference.h"
+#include "bitset-iterator.h"
+#include "bitset-view.h"
+
+#include <algorithm>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <sstream>
+#include <string>
 #include <string_view>
 
 class bitset {
 public:
   using value_type = bool;
-  using reference = void;
-  using const_reference = void;
-  using iterator = void;
-  using const_iterator = void;
-  using view = void;
-  using const_view = void;
-  using word_type = void;
+  using word_type = std::uint64_t;
+  using reference = bitset_reference<word_type>;
+  using const_reference = bitset_reference<const word_type>;
+  using iterator = bitset_iterator<word_type>;
+  using const_iterator = bitset_iterator<const word_type>;
+  using view = bitset_view<word_type>;
+  using const_view = bitset_view<const word_type>;
 
   static constexpr std::size_t npos = -1;
 
@@ -29,7 +38,7 @@ public:
 
   ~bitset();
 
-  void swap(bitset& other);
+  void swap(bitset& other) noexcept;
 
   std::size_t size() const;
   bool empty() const;
@@ -62,9 +71,26 @@ public:
 
   view subview(std::size_t offset = 0, std::size_t count = npos);
   const_view subview(std::size_t offset = 0, std::size_t count = npos) const;
+private:
+  std::size_t capacity() const {
+    return capacity_;
+  }
+
+  word_type* data() const {
+    return data_;
+  }
+
+  static constexpr std::size_t WORD_BITS = sizeof(word_type) * 8;
+private:
+  std::size_t size_;
+  std::size_t capacity_;
+  word_type* data_;
 };
 
 bool operator==(const bitset& left, const bitset& right);
 bool operator!=(const bitset& left, const bitset& right);
 
-void swap(bitset& lhs, bitset& rhs);
+std::string to_string(const bitset& bs);
+std::ostream& operator<<(std::ostream& out, const bitset& bs);
+
+void swap(bitset& lhs, bitset& rhs) noexcept;
