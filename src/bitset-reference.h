@@ -1,8 +1,6 @@
 #pragma once
 
-// #include "bitset.h"
 #include <cstddef>
-// #include <iostream>
 
 class bitset;
 

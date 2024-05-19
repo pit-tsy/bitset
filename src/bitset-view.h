@@ -132,12 +132,6 @@ public:
     return {begin() + offset, end()};
   }
 
-  // bitset_view<T> subview(std::size_t offset = 0, std::size_t count = -1) const {
-  //   if (offset > size()) return {};
-  //   if (offset + count <= size()) return {begin() + offset, begin() + offset + count};
-  //   return {begin() + offset, end()};
-  // }
-
   friend bool operator==(const bitset_view& left, const bitset_view& right) {
     if (left.size() != right.size()) {
       return false;
@@ -170,9 +164,6 @@ public:
 
 private:
   friend class bitset;
-
-  // template <typename K>
-  // friend class bitset_view<K>;
 
   bitset_view applyOp(const bitset_view<const T>& other, std::function<T(T a, T b)> op) const {
     for (std::size_t i = 0; i < size(); ++i) {

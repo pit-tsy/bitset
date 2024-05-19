@@ -1,7 +1,6 @@
 #pragma once
 
 #include "bitset-reference.h"
-// #include "bitset.h"
 
 #include <compare>
 #include <iterator>
