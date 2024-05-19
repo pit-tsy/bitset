@@ -311,7 +311,20 @@ bitset operator<<(const bitset& bs, std::size_t count) {
   return tmp;
 }
 
+bitset operator<<(const bitset::const_view bs, std::size_t count) {
+  bitset tmp(bs.size() + count, false);
+  for (std::size_t i = 0; i < bs.size(); ++i) {
+    tmp[i] = bs[i];
+  }
+  return tmp;
+}
+
 bitset operator>>(const bitset& bs, std::size_t count) {
+  bitset tmp(bs.subview(0, bs.size() - count));
+  return tmp;
+}
+
+bitset operator>>(const bitset::const_view bs, std::size_t count) {
   bitset tmp(bs.subview(0, bs.size() - count));
   return tmp;
 }
