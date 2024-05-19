@@ -2,9 +2,10 @@
 
 #include "bitset-iterator.h"
 #include "bitset-reference.h"
+
 #include <functional>
 
-template<typename T>
+template <typename T>
 class bitset_view {
 public:
   using value_type = bool;
@@ -16,10 +17,12 @@ public:
   bitset_view() = default;
 
   bitset_view(bitset_iterator<T> begin, bitset_iterator<T> end)
-      : begin_(begin), end_(end) {}
+      : begin_(begin)
+      , end_(end) {}
 
   bitset_view(const bitset_view& other)
-      : begin_(other.begin()), end_(other.end()) {}
+      : begin_(other.begin())
+      , end_(other.end()) {}
 
   operator bitset_view<const T>() const {
     return {begin_, end_};
@@ -58,36 +61,37 @@ public:
     std::swap(end_, other.end_);
   }
 
-  void flip() {
+  bitset_view flip() const {
     for (auto b : *this) {
       b = !b;
     }
+    return *this;
   }
 
-  bitset_view& set() & {
+  bitset_view set() const {
     for (auto it = begin(); it != end(); ++it) {
       *it = 1;
     }
     return *this;
   }
 
-  bitset_view& reset() & {
+  bitset_view reset() const {
     for (auto it = begin(); it != end(); ++it) {
       *it = 0;
     }
     return *this;
   }
 
-  bitset_view& operator&=(const bitset_view<const T>& other) const {
-    return applyOp(other, [](T a, T b) {return a & b; });
+  bitset_view operator&=(const bitset_view<const T>& other) const {
+    return applyOp(other, [](T a, T b) { return a & b; });
   }
 
-  bitset_view& operator|=(const bitset_view<const T>& other) & {
-    return applyOp(other, [](T a, T b) {return a | b; });
+  bitset_view operator|=(const bitset_view<const T>& other) const {
+    return applyOp(other, [](T a, T b) { return a | b; });
   }
 
-  bitset_view& operator^=(const bitset_view<const T>& other) & {
-    return applyOp(other, [](T a, T b) {return a ^ b; });
+  bitset_view operator^=(const bitset_view<const T>& other) const {
+    return applyOp(other, [](T a, T b) { return a ^ b; });
   }
 
   bool all() const {
@@ -98,8 +102,6 @@ public:
     }
     return true;
   }
-
-
 
   bool any() const {
     for (auto it = begin(); it != end(); ++it) {
@@ -113,26 +115,37 @@ public:
   std::size_t count() const {
     std::size_t cnt = 0;
     for (auto it = begin(); it != end(); ++it) {
-      if (*it) ++cnt;
+      if (*it) {
+        ++cnt;
+      }
     }
     return cnt;
   }
 
-  bitset_view<T> subview(std::size_t offset = 0, std::size_t count = -1) {
-    if (offset > size()) return {};
-    if (offset + count <= size()) return {begin() + offset, begin() + offset + count};
+  bitset_view<T> subview(std::size_t offset = 0, std::size_t count = -1) const {
+    if (offset > size()) {
+      return {};
+    }
+    if (count != -1 && offset + count <= size()) {
+      return {begin() + offset, begin() + offset + count};
+    }
     return {begin() + offset, end()};
   }
 
-  bitset_view<T> subview(std::size_t offset = 0, std::size_t count = -1) const {
-    if (offset > size()) return {};
-    if (offset + count <= size()) return {begin() + offset, begin() + offset + count};
-    return {begin() + offset, end()};
-  }
+  // bitset_view<T> subview(std::size_t offset = 0, std::size_t count = -1) const {
+  //   if (offset > size()) return {};
+  //   if (offset + count <= size()) return {begin() + offset, begin() + offset + count};
+  //   return {begin() + offset, end()};
+  // }
 
   friend bool operator==(const bitset_view& left, const bitset_view& right) {
+    if (left.size() != right.size()) {
+      return false;
+    }
     for (std::size_t i = 0; i < left.size(); ++i) {
-      if (left[i] != right[i]) return false;
+      if (left[i] != right[i]) {
+        return false;
+      }
     }
     return true;
   }
@@ -140,7 +153,6 @@ public:
   friend bool operator!=(const bitset_view& left, const bitset_view& right) {
     return !(left == right);
   }
-
 
   friend std::string to_string(const bitset_view<T>& bs) {
     std::string result;
@@ -155,13 +167,14 @@ public:
     out << str;
     return out;
   }
+
 private:
   friend class bitset;
 
-//  template <typename K>
-//  friend class bitset_view<K>;
+  // template <typename K>
+  // friend class bitset_view<K>;
 
-  bitset_view& applyOp(const bitset_view<const T> & other, std::function<T(T a, T b)> op) & {
+  bitset_view applyOp(const bitset_view<const T>& other, std::function<T(T a, T b)> op) const {
     for (std::size_t i = 0; i < size(); ++i) {
       (*this)[i] = op((*this)[i], other[i]);
     }

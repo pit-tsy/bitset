@@ -1,7 +1,7 @@
 #pragma once
 
-#include "bitset-reference.h"
 #include "bitset-iterator.h"
+#include "bitset-reference.h"
 #include "bitset-view.h"
 
 #include <algorithm>
@@ -71,6 +71,7 @@ public:
 
   view subview(std::size_t offset = 0, std::size_t count = npos);
   const_view subview(std::size_t offset = 0, std::size_t count = npos) const;
+
 private:
   std::size_t capacity() const {
     return capacity_;
@@ -81,6 +82,7 @@ private:
   }
 
   static constexpr std::size_t WORD_BITS = sizeof(word_type) * 8;
+
 private:
   std::size_t size_;
   std::size_t capacity_;
@@ -94,3 +96,14 @@ std::string to_string(const bitset& bs);
 std::ostream& operator<<(std::ostream& out, const bitset& bs);
 
 void swap(bitset& lhs, bitset& rhs) noexcept;
+
+bitset operator&(const bitset& lhs, const bitset& rhs);
+bitset operator&(const bitset::const_view& lhs, const bitset::const_view& rhs);
+bitset operator|(const bitset& lhs, const bitset& rhs);
+bitset operator|(const bitset::const_view& lhs, const bitset::const_view& rhs);
+bitset operator^(const bitset& lhs, const bitset& rhs);
+bitset operator^(const bitset::const_view& lhs, const bitset::const_view& rhs);
+bitset operator~(const bitset& bs);
+bitset operator~(const bitset::const_view& bs);
+bitset operator<<(const bitset& bs, std::size_t count);
+bitset operator>>(const bitset& bs, std::size_t count);

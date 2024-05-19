@@ -1,12 +1,10 @@
 #pragma once
 
 #include "bitset-reference.h"
-//#include "bitset.h"
+// #include "bitset.h"
 
 #include <compare>
 #include <iterator>
-
-
 
 template <typename T>
 class bitset_iterator {
@@ -41,9 +39,9 @@ public:
   }
 
   bitset_iterator operator++(int) {
-      bitset_iterator copy = *this;
-      ++*this;
-      return copy;
+    bitset_iterator copy = *this;
+    ++*this;
+    return copy;
   }
 
   bitset_iterator& operator--() {
@@ -92,8 +90,7 @@ public:
   }
 
   friend difference_type operator-(const bitset_iterator& lhs, const bitset_iterator& rhs) {
-    return (lhs.word_ptr_ - rhs.word_ptr_) * WORD_BITS
-         + (lhs.bit_index_ - rhs.bit_index_);
+    return (lhs.word_ptr_ - rhs.word_ptr_) * WORD_BITS + (lhs.bit_index_ - rhs.bit_index_);
   }
 
   friend bool operator==(const bitset_iterator& lhs, const bitset_iterator& rhs) {
@@ -107,6 +104,7 @@ public:
       return lhs.word_ptr_ <=> rhs.word_ptr_;
     }
   }
+
 private:
   bitset_iterator(T* data_, std::size_t bit_index)
       : word_ptr_(data_ + bit_index / WORD_BITS)
@@ -133,6 +131,7 @@ private:
 
   template <typename K>
   friend class bitset_iterator;
+
 private:
   static constexpr std::size_t WORD_BITS = sizeof(T) * 8;
 
