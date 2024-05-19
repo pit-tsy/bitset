@@ -11,12 +11,12 @@ template <typename T>
 class bitset_reference {
 public:
   bitset_reference& operator=(bool b) {
-    *word_ = *word_ & (ALL_BITS ^ (T(1) << bit_index_)) | (T(b) << bit_index_);
+    *word_ = (*word_ & (ALL_BITS ^ (T(1) << bit_index_))) | (T(b) << bit_index_);
     return *this;
   }
 
   bitset_reference& operator=(const bitset_reference& other) {
-    *word_ = *word_ & (ALL_BITS ^ (T(1) << bit_index_)) | (T(other) << bit_index_);
+    *word_ = (*word_ & (ALL_BITS ^ (T(1) << bit_index_))) | (T(other) << bit_index_);
     return *this;
   }
 
