@@ -4,6 +4,7 @@
 #include "bitset-reference.h"
 
 #include <functional>
+#include <string>
 
 template <typename T>
 class bitset_view {
