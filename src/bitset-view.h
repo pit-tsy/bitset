@@ -127,10 +127,10 @@ public:
   }
 
   bitset_view<T> subview(std::size_t offset = 0, std::size_t count = -1) const {
-    if (offset >= size()) {
+    if (offset > size()) {
       return {end(), end()};
     }
-    if (count != -1 && offset + count <= size()) {
+    if (count != -1 && count <= size() - offset) {
       return {begin() + offset, begin() + offset + count};
     }
     return {begin() + offset, end()};

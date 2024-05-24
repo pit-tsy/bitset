@@ -213,20 +213,20 @@ bitset::operator view() {
 }
 
 bitset::view bitset::subview(std::size_t offset, std::size_t count) {
-  if (offset >= size()) {
+  if (offset > size()) {
     return {end(), end()};
   }
-  if (count != npos && offset + count <= size()) {
+  if (count != npos && count <= size() - offset) {
     return {begin() + offset, begin() + offset + count};
   }
   return {begin() + offset, end()};
 }
 
 bitset::const_view bitset::subview(std::size_t offset, std::size_t count) const {
-  if (offset >= size()) {
+  if (offset > size()) {
     return {end(), end()};
   }
-  if (count != npos && offset + count <= size()) {
+  if (count != npos && count <= size() - offset) {
     return {begin() + offset, begin() + offset + count};
   }
   return {begin() + offset, end()};
