@@ -142,7 +142,7 @@ bitset& bitset::operator<<=(std::size_t count) & {
   // std::cout << (*this) << std::endl;
   // std::cout << count << ' ' << size() << ' ' << tmp.size() << ' ' << tmp.capacity() << std::endl;
   for (std::size_t i = 0; i < size(); ++i) {
-    tmp[i] = (*this)[i];
+    tmp[i] = bool((*this)[i]);
   }
   swap(tmp);
   return *this;

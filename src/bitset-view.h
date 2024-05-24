@@ -21,21 +21,21 @@ public:
       : begin_(begin)
       , end_(end) {}
 
-  bitset_view(const bitset_view& other)
-      : begin_(other.begin())
-      , end_(other.end()) {}
+  // bitset_view(const bitset_view& other)
+  //     : begin_(other.begin())
+  //     , end_(other.end()) {}
 
   operator bitset_view<const T>() const {
     return {begin_, end_};
   }
 
-  bitset_view& operator=(const bitset_view& other) {
-    if (other != *this) {
-      bitset_view tmp(other);
-      swap(tmp);
-    }
-    return *this;
-  }
+  // bitset_view& operator=(const bitset_view& other) {
+  //   if (other != *this) {
+  //     bitset_view tmp(other);
+  //     swap(tmp);
+  //   }
+  //   return *this;
+  // }
 
   std::size_t size() const {
     return end() - begin();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <iostream>
 #include <utility>
 
 class bitset;
@@ -13,27 +14,25 @@ class bitset_reference {
 public:
   bitset_reference operator=(bool b) const {
     *word_ = (*word_ & (ALL_BITS ^ (T(1) << bit_index_))) | (T(b) << bit_index_);
-    return *this;
+    return {word_, bit_index_};
   }
 
-  bitset_reference& operator=(const bitset_reference& other) {
-    *word_ = (*word_ & (ALL_BITS ^ (T(1) << bit_index_))) | (T(other) << bit_index_);
-    return *this;
-  }
+  // bitset_reference& operator=(const bitset_reference& other) {
+  //   *word_ = (*word_ & (ALL_BITS ^ (T(1) << bit_index_))) | (T(other) << bit_index_);
+  //   return *this;
+  // }
 
   bitset_reference operator&=(bool b) const {
-    operator=(bool() & b);
-    return *this;
+    return operator=(bool(*this) && b);
   }
 
   bitset_reference operator|=(bool b) const {
-    operator=(bool() | b);
-    return *this;
+    return operator=(bool(*this) || b);
   }
 
   bitset_reference operator^=(bool b) const {
-    operator=(bool() ^ b);
-    return *this;
+    return operator=(bool(*this) ^ b);
+    ;
   }
 
   operator bitset_reference<const T>() const {

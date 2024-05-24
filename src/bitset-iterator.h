@@ -113,7 +113,14 @@ public:
 private:
   bitset_iterator(T* data_, difference_type bit_index)
       : word_ptr_(data_ + (bit_index / WORD_BITS))
-      , bit_index_((bit_index % WORD_BITS + WORD_BITS) % WORD_BITS) {}
+      , bit_index_((bit_index % WORD_BITS + WORD_BITS) % WORD_BITS) {
+    if (bit_index < 0 && bit_index % WORD_BITS != 0) {
+      --word_ptr_;
+    }
+    // std::cout << "bitset_iterator(*, *): \n";
+    // std::cout << bit_index << ' ' << bit_index / WORD_BITS << ' ' << (bit_index % WORD_BITS + WORD_BITS) %
+    // WORD_BITS<< '\n'; std::cout << bit_index_ << ' ' << data_ - word_ptr_ << '\n';
+  }
 
   std::size_t bit_index() const {
     return bit_index_;
@@ -133,7 +140,7 @@ private:
   friend class bitset_iterator;
 
 private:
-  static constexpr std::size_t WORD_BITS = sizeof(T) * 8;
+  static constexpr difference_type WORD_BITS = sizeof(T) * 8;
 
   T* word_ptr_;
   difference_type bit_index_;
