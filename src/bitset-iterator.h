@@ -72,14 +72,6 @@ public:
 
   bitset_iterator& operator-=(const difference_type n) {
     bitset_iterator tmp(word_ptr_, bit_index_ - n);
-    std::cout << n << '\n';
-    std::cout << bit_index_ << ' ' << word_ptr_ << '\n';
-    std::cout << tmp.bit_index_ << ' ' << tmp.word_ptr_ << '\n';
-    std::cout << bit_index_ - tmp.bit_index_ << '\n';
-    std::cout << word_ptr_ - tmp.word_ptr_ << '\n';
-    std::cout << (bit_index_ - n) / WORD_BITS << '\n';
-    std::cout << (bit_index_ - n) << '\n';
-    std::cout << WORD_BITS << '\n';
     swap(tmp);
     return *this;
   }
@@ -147,8 +139,7 @@ private:
   difference_type bit_index_;
 };
 
-
-template<typename T>
+template <typename T>
 void swap(bitset_iterator<T>& lhs, bitset_iterator<T>& rhs) noexcept {
   lhs.swap(rhs);
 }

@@ -132,6 +132,7 @@ public:
     }
     return {begin() + offset, end()};
   }
+
 private:
   friend class bitset;
 

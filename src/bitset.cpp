@@ -278,7 +278,6 @@ bitset operator>>(const bitset::const_view& bs, std::size_t count) {
   return tmp;
 }
 
-
 bool operator==(const bitset::const_view& left, const bitset::const_view& right) {
   if (left.size() != right.size()) {
     return false;

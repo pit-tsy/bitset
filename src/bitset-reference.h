@@ -36,7 +36,7 @@ public:
     return *this;
   }
 
-  operator bitset_reference<const T> () const {
+  operator bitset_reference<const T>() const {
     return {word_, bit_index_};
   }
 
@@ -56,6 +56,7 @@ public:
     std::swap(word_, other.word_);
     std::swap(word_, other.word_);
   }
+
 private:
   bitset_reference(T* data_, std::size_t bit_index)
       : word_(data_ + bit_index / WORD_BITS)
@@ -63,10 +64,10 @@ private:
 
   friend bitset;
 
-  template<typename K>
+  template <typename K>
   friend class bitset_iterator;
 
-  template<typename K>
+  template <typename K>
   friend class bitset_reference;
 
 private:
