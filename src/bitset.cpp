@@ -56,7 +56,7 @@ bitset::~bitset() {
 }
 
 bitset& bitset::operator=(const bitset& other) & {
-  if (other != *this) {
+  if (&other != this) {
     bitset tmp(other);
     swap(tmp);
   }
@@ -78,6 +78,7 @@ bitset& bitset::operator=(const bitset::const_view& other) & {
 void bitset::swap(bitset& other) noexcept {
   std::swap(data_, other.data_);
   std::swap(size_, other.size_);
+  std::swap(capacity_, other.capacity_);
 }
 
 std::size_t bitset::size() const {
@@ -239,13 +240,46 @@ void swap(bitset& lhs, bitset& rhs) noexcept {
   lhs.swap(rhs);
 }
 
-std::ostream& operator<<(std::ostream& out, const bitset& bs) {
-  std::string str = to_string(bs);
-  out << str;
-  return out;
+void swap(bitset::reference& lhs, bitset::reference& rhs) noexcept {
+  lhs.swap(rhs);
 }
 
-bool operator==(const bitset& left, const bitset& right) {
+bitset operator&(const bitset::const_view& lhs, const bitset::const_view& rhs) {
+  bitset result(lhs);
+  return (result &= rhs);
+}
+
+bitset operator|(const bitset::const_view& lhs, const bitset::const_view& rhs) {
+  bitset result(lhs);
+  return (result |= rhs);
+}
+
+bitset operator^(const bitset::const_view& lhs, const bitset::const_view& rhs) {
+  bitset result(lhs);
+  return (result ^= rhs);
+}
+
+bitset operator~(const bitset::const_view& bs) {
+  bitset other(bs);
+  other.flip();
+  return other;
+}
+
+bitset operator<<(const bitset::const_view& bs, std::size_t count) {
+  bitset tmp(bs.size() + count, false);
+  for (std::size_t i = 0; i < bs.size(); ++i) {
+    tmp[i] = bs[i];
+  }
+  return tmp;
+}
+
+bitset operator>>(const bitset::const_view& bs, std::size_t count) {
+  bitset tmp(bs.subview(0, bs.size() - count));
+  return tmp;
+}
+
+
+bool operator==(const bitset::const_view& left, const bitset::const_view& right) {
   if (left.size() != right.size()) {
     return false;
   }
@@ -257,74 +291,21 @@ bool operator==(const bitset& left, const bitset& right) {
   return true;
 }
 
-bool operator!=(const bitset& left, const bitset& right) {
+bool operator!=(const bitset::const_view& left, const bitset::const_view& right) {
   return !(left == right);
 }
 
-bitset operator&(const bitset& lhs, const bitset& rhs) {
-  bitset result(lhs);
-  return (result &= rhs);
-}
-
-bitset operator&(const bitset::const_view& lhs, const bitset::const_view& rhs) {
-  bitset result(lhs);
-  return (result &= rhs);
-}
-
-bitset operator|(const bitset& lhs, const bitset& rhs) {
-  bitset result(lhs);
-  return (result |= rhs);
-}
-
-bitset operator|(const bitset::const_view& lhs, const bitset::const_view& rhs) {
-  bitset result(lhs);
-  return (result |= rhs);
-}
-
-bitset operator^(const bitset& lhs, const bitset& rhs) {
-  bitset result(lhs);
-  return (result ^= rhs);
-}
-
-bitset operator^(const bitset::const_view& lhs, const bitset::const_view& rhs) {
-  bitset result(lhs);
-  return (result ^= rhs);
-}
-
-bitset operator~(const bitset& bs) {
-  bitset other(bs);
-  other.flip();
-  return other;
-}
-
-bitset operator~(const bitset::const_view& bs) {
-  bitset other(bs);
-  other.flip();
-  return other;
-}
-
-bitset operator<<(const bitset& bs, std::size_t count) {
-  bitset tmp(bs.size() + count, false);
-  for (std::size_t i = 0; i < bs.size(); ++i) {
-    tmp[i] = bs[i];
+std::string to_string(const bitset::const_view& bs) {
+  std::string result;
+  for (auto b : bs) {
+    result += (b ? '1' : '0');
   }
-  return tmp;
+  return result;
 }
 
-bitset operator<<(const bitset::const_view bs, std::size_t count) {
-  bitset tmp(bs.size() + count, false);
-  for (std::size_t i = 0; i < bs.size(); ++i) {
-    tmp[i] = bs[i];
+std::ostream& operator<<(std::ostream& out, const bitset::const_view& bs) {
+  for (auto b : bs) {
+    out << (b ? '1' : '0');
   }
-  return tmp;
-}
-
-bitset operator>>(const bitset& bs, std::size_t count) {
-  bitset tmp(bs.subview(0, bs.size() - count));
-  return tmp;
-}
-
-bitset operator>>(const bitset::const_view bs, std::size_t count) {
-  bitset tmp(bs.subview(0, bs.size() - count));
-  return tmp;
+  return out;
 }

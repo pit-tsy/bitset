@@ -3,6 +3,7 @@
 #include "bitset-reference.h"
 
 #include <compare>
+#include <iostream>
 #include <iterator>
 
 template <typename T>
@@ -18,6 +19,11 @@ public:
 
   operator bitset_iterator<const T>() const {
     return {word_ptr_, bit_index_};
+  }
+
+  void swap(bitset_iterator& other) noexcept {
+    std::swap(word_ptr_, other.word_ptr_);
+    std::swap(bit_index_, other.bit_index_);
   }
 
   reference operator*() const {
@@ -66,6 +72,14 @@ public:
 
   bitset_iterator& operator-=(const difference_type n) {
     bitset_iterator tmp(word_ptr_, bit_index_ - n);
+    std::cout << n << '\n';
+    std::cout << bit_index_ << ' ' << word_ptr_ << '\n';
+    std::cout << tmp.bit_index_ << ' ' << tmp.word_ptr_ << '\n';
+    std::cout << bit_index_ - tmp.bit_index_ << '\n';
+    std::cout << word_ptr_ - tmp.word_ptr_ << '\n';
+    std::cout << (bit_index_ - n) / WORD_BITS << '\n';
+    std::cout << (bit_index_ - n) << '\n';
+    std::cout << WORD_BITS << '\n';
     swap(tmp);
     return *this;
   }
@@ -105,14 +119,9 @@ public:
   }
 
 private:
-  bitset_iterator(T* data_, std::size_t bit_index)
-      : word_ptr_(data_ + bit_index / WORD_BITS)
-      , bit_index_(bit_index % WORD_BITS) {}
-
-  void swap(bitset_iterator& other) noexcept {
-    std::swap(word_ptr_, other.word_ptr_);
-    std::swap(bit_index_, other.bit_index_);
-  }
+  bitset_iterator(T* data_, difference_type bit_index)
+      : word_ptr_(data_ + (bit_index / WORD_BITS))
+      , bit_index_((bit_index % WORD_BITS + WORD_BITS) % WORD_BITS) {}
 
   std::size_t bit_index() const {
     return bit_index_;
@@ -135,5 +144,11 @@ private:
   static constexpr std::size_t WORD_BITS = sizeof(T) * 8;
 
   T* word_ptr_;
-  std::size_t bit_index_;
+  difference_type bit_index_;
 };
+
+
+template<typename T>
+void swap(bitset_iterator<T>& lhs, bitset_iterator<T>& rhs) noexcept {
+  lhs.swap(rhs);
+}

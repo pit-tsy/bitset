@@ -32,7 +32,7 @@ public:
   bitset_view& operator=(const bitset_view& other) {
     if (other != *this) {
       bitset_view tmp(other);
-      swap(other);
+      swap(tmp);
     }
     return *this;
   }
@@ -57,9 +57,9 @@ public:
     return end_;
   }
 
-  void swap(const bitset_view& other) noexcept {
-    std::swap(begin_, other.begin_);
-    std::swap(end_, other.end_);
+  void swap(bitset_view& other) noexcept {
+    begin_.swap(other.begin_);
+    end_.swap(other.end_);
   }
 
   bitset_view flip() const {
@@ -132,37 +132,6 @@ public:
     }
     return {begin() + offset, end()};
   }
-
-  friend bool operator==(const bitset_view& left, const bitset_view& right) {
-    if (left.size() != right.size()) {
-      return false;
-    }
-    for (std::size_t i = 0; i < left.size(); ++i) {
-      if (left[i] != right[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  friend bool operator!=(const bitset_view& left, const bitset_view& right) {
-    return !(left == right);
-  }
-
-  friend std::string to_string(const bitset_view<T>& bs) {
-    std::string result;
-    for (auto b : bs) {
-      result += (b ? '1' : '0');
-    }
-    return result;
-  }
-
-  friend std::ostream& operator<<(std::ostream& out, const bitset_view<T>& bs) {
-    std::string str = to_string(bs);
-    out << str;
-    return out;
-  }
-
 private:
   friend class bitset;
 
