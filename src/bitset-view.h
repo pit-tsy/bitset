@@ -10,10 +10,13 @@ template <typename T>
 class bitset_view {
 public:
   using value_type = bool;
-  using reference = bitset_reference<T>;
-  using const_reference = bitset_reference<const T>;
-  using iterator = bitset_iterator<T>;
-  using const_iterator = bitset_iterator<const T>;
+  using word_type = T;
+  using reference = bitset_reference<word_type>;
+  using const_reference = bitset_reference<const word_type>;
+  using iterator = bitset_iterator<word_type>;
+  using const_iterator = bitset_iterator<const word_type>;
+  using view = bitset_view<word_type>;
+  using const_view = bitset_view<const word_type>;
 
   bitset_view() = default;
 
@@ -124,8 +127,8 @@ public:
   }
 
   bitset_view<T> subview(std::size_t offset = 0, std::size_t count = -1) const {
-    if (offset > size()) {
-      return {};
+    if (offset >= size()) {
+      return {end(), end()};
     }
     if (count != -1 && offset + count <= size()) {
       return {begin() + offset, begin() + offset + count};
