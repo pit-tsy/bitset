@@ -5,7 +5,6 @@
 #include "bitset-view.h"
 
 #include <algorithm>
-#include <iostream>
 
 bitset::bitset()
     : size_(0)

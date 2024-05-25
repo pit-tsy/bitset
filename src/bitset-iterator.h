@@ -31,7 +31,6 @@ public:
   }
 
   reference operator[](difference_type index) const {
-    // return reference(calc_word(word_ptr_, index), (bit_index_ + index) % WORD_BITS);
     return reference(word_ptr_, bit_index_ + index);
   }
 
@@ -116,14 +115,7 @@ public:
 private:
   bitset_iterator(T* data_, difference_type bit_index)
       : word_ptr_(calc_word(data_, bit_index))
-      , bit_index_(bit_index % WORD_BITS) {
-    // if (bit_index < 0 && bit_index % WORD_BITS != 0) {
-    //   --word_ptr_;
-    // }
-    // std::cout << "bitset_iterator(*, *): \n";
-    // std::cout << bit_index << ' ' << bit_index / WORD_BITS << ' ' << (bit_index % WORD_BITS + WORD_BITS) %
-    // WORD_BITS<< '\n'; std::cout << bit_index_ << ' ' << data_ - word_ptr_ << '\n';
-  }
+      , bit_index_(bit_index % WORD_BITS) {}
 
   T* calc_word(T* cur_word, difference_type bit_index) const {
     T* result = cur_word + (bit_index / static_cast<difference_type>(WORD_BITS));
@@ -133,22 +125,13 @@ private:
     return result;
   }
 
-  std::size_t bit_index() const {
-    return bit_index_;
-  }
-
-  T word() const {
-    return *word_ptr_;
-  }
-
-  void to_next_word() const {
-    word_ptr_ += WORD_BITS;
-  }
-
   friend class bitset;
 
   template <typename K>
   friend class bitset_iterator;
+
+  template <typename K>
+  friend class bitset_view;
 
 private:
   static constexpr std::size_t WORD_BITS = sizeof(T) * 8;

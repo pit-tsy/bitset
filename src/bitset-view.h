@@ -3,8 +3,7 @@
 #include "bitset-iterator.h"
 #include "bitset-reference.h"
 
-#include <functional>
-#include <string>
+#include <cmath>
 
 template <typename T>
 class bitset_view {
@@ -24,21 +23,9 @@ public:
       : begin_(begin)
       , end_(end) {}
 
-  // bitset_view(const bitset_view& other)
-  //     : begin_(other.begin())
-  //     , end_(other.end()) {}
-
   operator bitset_view<const T>() const {
     return {begin_, end_};
   }
-
-  // bitset_view& operator=(const bitset_view& other) {
-  //   if (other != *this) {
-  //     bitset_view tmp(other);
-  //     swap(tmp);
-  //   }
-  //   return *this;
-  // }
 
   std::size_t size() const {
     return end() - begin();
@@ -139,7 +126,8 @@ public:
 private:
   friend class bitset;
 
-  bitset_view applyOp(const bitset_view<const T>& other, std::function<T(T a, T b)> op) const {
+  template <typename Func>
+  bitset_view applyOp(const bitset_view<const T>& other, Func op) const {
     for (std::size_t i = 0; i < size(); ++i) {
       (*this)[i] = op((*this)[i], other[i]);
     }
