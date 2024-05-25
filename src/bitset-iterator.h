@@ -2,8 +2,8 @@
 
 #include "bitset-reference.h"
 
+#include <cmath>
 #include <compare>
-#include <iostream>
 #include <iterator>
 
 template <typename T>
@@ -31,14 +31,16 @@ public:
   }
 
   reference operator[](difference_type index) const {
+    // return reference(calc_word(word_ptr_, index), (bit_index_ + index) % WORD_BITS);
     return reference(word_ptr_, bit_index_ + index);
   }
 
   bitset_iterator& operator++() {
-    ++bit_index_;
-    if (bit_index_ == WORD_BITS) {
+    if (bit_index_ + 1 == WORD_BITS) {
       bit_index_ = 0;
       ++word_ptr_;
+    } else {
+      ++bit_index_;
     }
     return *this;
   }
@@ -50,10 +52,11 @@ public:
   }
 
   bitset_iterator& operator--() {
-    --bit_index_;
-    if (bit_index_ == -1) {
+    if (bit_index_ == 0) {
       bit_index_ = WORD_BITS - 1;
       --word_ptr_;
+    } else {
+      --bit_index_;
     }
     return *this;
   }
@@ -112,14 +115,22 @@ public:
 
 private:
   bitset_iterator(T* data_, difference_type bit_index)
-      : word_ptr_(data_ + (bit_index / WORD_BITS))
-      , bit_index_((bit_index % WORD_BITS + WORD_BITS) % WORD_BITS) {
-    if (bit_index < 0 && bit_index % WORD_BITS != 0) {
-      --word_ptr_;
-    }
+      : word_ptr_(calc_word(data_, bit_index))
+      , bit_index_(bit_index % WORD_BITS) {
+    // if (bit_index < 0 && bit_index % WORD_BITS != 0) {
+    //   --word_ptr_;
+    // }
     // std::cout << "bitset_iterator(*, *): \n";
     // std::cout << bit_index << ' ' << bit_index / WORD_BITS << ' ' << (bit_index % WORD_BITS + WORD_BITS) %
     // WORD_BITS<< '\n'; std::cout << bit_index_ << ' ' << data_ - word_ptr_ << '\n';
+  }
+
+  T* calc_word(T* cur_word, difference_type bit_index) const {
+    T* result = cur_word + (bit_index / static_cast<difference_type>(WORD_BITS));
+    if (bit_index < 0 && bit_index % WORD_BITS != 0) {
+      --result;
+    }
+    return result;
   }
 
   std::size_t bit_index() const {
@@ -140,7 +151,7 @@ private:
   friend class bitset_iterator;
 
 private:
-  static constexpr difference_type WORD_BITS = sizeof(T) * 8;
+  static constexpr std::size_t WORD_BITS = sizeof(T) * 8;
 
   T* word_ptr_;
   difference_type bit_index_;

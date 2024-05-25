@@ -39,7 +39,7 @@ public:
     return {word_, bit_index_};
   }
 
-  bitset_reference operator[](std::size_t index) const {
+  bitset_reference operator[](std::ptrdiff_t index) const {
     return bitset_reference(word_, bit_index_ + index);
   }
 
@@ -59,7 +59,7 @@ public:
 private:
   bitset_reference(T* data_, std::size_t bit_index)
       : word_(data_ + bit_index / WORD_BITS)
-      , bit_index_((bit_index % WORD_BITS + WORD_BITS) % WORD_BITS) {}
+      , bit_index_(bit_index % WORD_BITS) {}
 
   friend bitset;
 
