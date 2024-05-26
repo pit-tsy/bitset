@@ -54,15 +54,15 @@ public:
   }
 
   bitset_view flip() const {
-    return applyUnaryOp([](word_type x) { return ~x; });
+    return applyUnaryOp([](T x) { return ~x; });
   }
 
   bitset_view set() const {
-    return applyUnaryOp([](word_type x) { return T(-1); });
+    return applyUnaryOp([](T) { return ALL_BITS; });
   }
 
   bitset_view reset() const {
-    return applyUnaryOp([](word_type x) { return 0; });
+    return applyUnaryOp([](T) { return 0; });
   }
 
   bitset_view operator&=(const bitset_view<const T>& other) const {
