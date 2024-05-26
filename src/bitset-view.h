@@ -2,6 +2,7 @@
 
 #include "bitset-iterator.h"
 #include "bitset-reference.h"
+#include "consts.h"
 
 #include <cmath>
 
@@ -53,62 +54,69 @@ public:
   }
 
   bitset_view flip() const {
-    for (auto b : *this) {
-      b = !b;
-    }
-    return *this;
+    return applyUnaryOp([](word_type x) { return ~x; });
   }
 
   bitset_view set() const {
-    for (auto it = begin(); it != end(); ++it) {
-      *it = 1;
-    }
-    return *this;
+    return applyUnaryOp([](word_type x) { return T(-1); });
   }
 
   bitset_view reset() const {
-    for (auto it = begin(); it != end(); ++it) {
-      *it = 0;
-    }
-    return *this;
+    return applyUnaryOp([](word_type x) { return 0; });
   }
 
   bitset_view operator&=(const bitset_view<const T>& other) const {
-    return applyOp(other, [](T a, T b) { return a & b; });
+    return applyBinaryOp(other, [](T a, T b) { return a & b; });
   }
 
   bitset_view operator|=(const bitset_view<const T>& other) const {
-    return applyOp(other, [](T a, T b) { return a | b; });
+    return applyBinaryOp(other, [](T a, T b) { return a | b; });
   }
 
   bitset_view operator^=(const bitset_view<const T>& other) const {
-    return applyOp(other, [](T a, T b) { return a ^ b; });
+    return applyBinaryOp(other, [](T a, T b) { return a ^ b; });
   }
 
   bool all() const {
-    for (auto it = begin(); it != end(); ++it) {
-      if (!(*it)) {
+    for (auto it = begin(); it != end();) {
+      std::size_t bits = std::min(WORD_BITS, static_cast<std::size_t>(end() - it));
+      if (it.get_word(bits) != ALL_BITS >> (WORD_BITS - bits)) {
         return false;
       }
+      it += bits;
     }
     return true;
   }
 
   bool any() const {
-    for (auto it = begin(); it != end(); ++it) {
-      if (*it) {
+    for (auto it = begin(); it != end();) {
+      std::size_t bits = std::min(WORD_BITS, static_cast<std::size_t>(end() - it));
+      if (it.get_word(bits)) {
         return true;
       }
+      it += bits;
     }
     return false;
   }
 
+  bitset_view assign(const bitset_view<const T>& other) {
+    auto it = begin();
+    auto other_it = other.begin();
+    while (it != end()) {
+      std::size_t bits = std::min(WORD_BITS, static_cast<std::size_t>(end() - it));
+      it.set_word(other_it.get_word(bits), bits);
+      it += bits;
+      other_it += bits;
+    }
+    return *this;
+  }
+
   std::size_t count() const {
     std::size_t cnt = 0;
-    for (auto it = begin(); it != end(); ++it) {
-      if (*it) {
-        ++cnt;
-      }
+    for (auto it = begin(); it != end();) {
+      std::size_t bits = std::min(WORD_BITS, static_cast<std::size_t>(end() - it));
+      cnt += std::popcount(it.get_word(bits));
+      it += bits;
     }
     return cnt;
   }
@@ -127,14 +135,29 @@ private:
   friend class bitset;
 
   template <typename Func>
-  bitset_view applyOp(const bitset_view<const T>& other, Func op) const {
-    for (std::size_t i = 0; i < size(); ++i) {
-      (*this)[i] = op((*this)[i], other[i]);
+  bitset_view applyBinaryOp(const bitset_view<const T>& other, Func op) const {
+    auto it = begin();
+    auto other_it = other.begin();
+    while (it != end()) {
+      std::size_t bits = std::min(WORD_BITS, static_cast<std::size_t>(end() - it));
+      auto word1 = it.get_word(bits);
+      auto word2 = other_it.get_word(bits);
+      it.set_word(op(word1, word2), bits);
+      it += bits;
+      other_it += bits;
     }
     return *this;
   }
 
-  static constexpr std::size_t WORD_BITS = sizeof(T) * 8;
+  template <typename Func>
+  bitset_view applyUnaryOp(Func op) const {
+    for (auto it = begin(); it != end();) {
+      std::size_t bits = std::min(WORD_BITS, static_cast<std::size_t>(end() - it));
+      it.set_word(op(it.get_word(bits)) << (WORD_BITS - bits) >> (WORD_BITS - bits), bits);
+      it += bits;
+    }
+    return *this;
+  }
 
   bitset_iterator<T> begin_;
   bitset_iterator<T> end_;

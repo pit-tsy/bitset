@@ -1,10 +1,15 @@
 #pragma once
 
 #include "bitset-reference.h"
+#include "consts.h"
 
 #include <cmath>
 #include <compare>
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
+
+using word_type = uint64_t;
 
 template <typename T>
 class bitset_iterator {
@@ -125,6 +130,45 @@ private:
     return result;
   }
 
+  std::size_t bit_index() {
+    return bit_index_;
+  }
+
+  word_type get_word(std::size_t max_bits) {
+    word_type result = word() >> bit_index();
+    std::size_t curr_size = WORD_BITS - bit_index();
+    if (curr_size < max_bits) {
+      T next_word = (*this + curr_size).word();
+      result += (next_word << curr_size);
+    }
+    if (max_bits < WORD_BITS) {
+      result = (result << (WORD_BITS - max_bits) >> (WORD_BITS - max_bits));
+    }
+    return result;
+  }
+
+  void set_word(word_type word, std::size_t bits) {
+    word_type tmp = ALL_BITS ^ ((ALL_BITS >> (WORD_BITS - bits)) << bit_index());
+    *word_ptr_ = (*word_ptr_ & tmp) | (word << bit_index());
+    std::size_t curr_size = WORD_BITS - bit_index();
+    if (bits > curr_size) {
+      (*this + curr_size).set_word(word >> curr_size, bits + bit_index() - WORD_BITS);
+    }
+  }
+
+  bitset_iterator& to_next_word() {
+    *this += WORD_BITS - bit_index();
+    return *this;
+  }
+
+  word_type word() {
+    return *word_ptr_;
+  }
+
+  T* word_ptr() {
+    return word_ptr_;
+  }
+
   friend class bitset;
 
   template <typename K>
@@ -134,8 +178,6 @@ private:
   friend class bitset_view;
 
 private:
-  static constexpr std::size_t WORD_BITS = sizeof(T) * 8;
-
   T* word_ptr_;
   difference_type bit_index_;
 };

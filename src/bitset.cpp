@@ -138,8 +138,6 @@ bitset& bitset::operator>>=(std::size_t count) & {
 
 bitset& bitset::operator<<=(std::size_t count) & {
   bitset tmp(size() + count, false);
-  // std::cout << (*this) << std::endl;
-  // std::cout << count << ' ' << size() << ' ' << tmp.size() << ' ' << tmp.capacity() << std::endl;
   for (std::size_t i = 0; i < size(); ++i) {
     tmp[i] = bool((*this)[i]);
   }
@@ -148,51 +146,29 @@ bitset& bitset::operator<<=(std::size_t count) & {
 }
 
 void bitset::flip() & {
-  for (std::size_t i = 0; i < capacity(); ++i) {
-    data()[i] = ~data()[i];
-  }
+  subview().flip();
 }
 
 bitset& bitset::set() & {
-  for (std::size_t i = 0; i < capacity(); ++i) {
-    data()[i] = reference::ALL_BITS;
-  }
+  subview().set();
   return *this;
 }
 
 bitset& bitset::reset() & {
-  for (std::size_t i = 0; i < capacity(); ++i) {
-    data()[i] = 0;
-  }
+  subview().reset();
   return *this;
 }
 
 bool bitset::all() const {
-  for (auto it = begin(); it != end(); ++it) {
-    if (!(*it)) {
-      return false;
-    }
-  }
-  return true;
+  return subview().all();
 }
 
 bool bitset::any() const {
-  for (auto it = begin(); it != end(); ++it) {
-    if (*it) {
-      return true;
-    }
-  }
-  return false;
+  return subview().any();
 }
 
 std::size_t bitset::count() const {
-  std::size_t cnt = 0;
-  for (auto it = begin(); it != end(); ++it) {
-    if (*it) {
-      ++cnt;
-    }
-  }
-  return cnt;
+  return subview().count();
 }
 
 bitset::reference bitset::operator[](std::size_t index) {
@@ -266,9 +242,7 @@ bitset operator~(const bitset::const_view& bs) {
 
 bitset operator<<(const bitset::const_view& bs, std::size_t count) {
   bitset tmp(bs.size() + count, false);
-  for (std::size_t i = 0; i < bs.size(); ++i) {
-    tmp[i] = bs[i];
-  }
+  tmp.subview(0, bs.size()).assign(bs);
   return tmp;
 }
 

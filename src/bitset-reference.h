@@ -1,5 +1,7 @@
 #pragma once
 
+#include "consts.h"
+
 #include <cstddef>
 #include <iostream>
 #include <utility>
@@ -16,11 +18,6 @@ public:
     *word_ = (*word_ & (ALL_BITS ^ (T(1) << bit_index_))) | (T(b) << bit_index_);
     return {word_, bit_index_};
   }
-
-  // bitset_reference& operator=(const bitset_reference& other) {
-  //   *word_ = (*word_ & (ALL_BITS ^ (T(1) << bit_index_))) | (T(other) << bit_index_);
-  //   return *this;
-  // }
 
   bitset_reference operator&=(bool b) const {
     return operator=(bool(*this) && b);
@@ -70,9 +67,6 @@ private:
   friend class bitset_reference;
 
 private:
-  static constexpr T ALL_BITS = -1;
-  static constexpr std::size_t WORD_BITS = sizeof(T) * 8;
-
   T* word_;
   std::size_t bit_index_;
 };
