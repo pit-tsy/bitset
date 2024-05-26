@@ -4,6 +4,7 @@
 #include "bitset-reference.h"
 #include "consts.h"
 
+#include <bit>
 #include <cmath>
 
 template <typename T>
