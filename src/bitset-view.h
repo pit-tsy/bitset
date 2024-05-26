@@ -62,7 +62,7 @@ public:
   }
 
   bitset_view reset() const {
-    return applyUnaryOp([](T) { return 0; });
+    return applyUnaryOp([](T) { return ZERO; });
   }
 
   bitset_view operator&=(const bitset_view<const T>& other) const {
