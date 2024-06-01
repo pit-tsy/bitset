@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bitset-common.h"
 #include "bitset-iterator.h"
 #include "bitset-reference.h"
 #include "bitset-view.h"
@@ -15,7 +16,7 @@
 class bitset {
 public:
   using value_type = bool;
-  using word_type = uint64_t;
+  using word_type = bitset_common::word_type;
   using reference = bitset_reference<word_type>;
   using const_reference = bitset_reference<const word_type>;
   using iterator = bitset_iterator<word_type>;

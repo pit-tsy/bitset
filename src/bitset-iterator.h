@@ -1,7 +1,7 @@
 #pragma once
 
+#include "bitset-common.h"
 #include "bitset-reference.h"
-#include "consts.h"
 
 #include <cmath>
 #include <compare>
@@ -40,7 +40,7 @@ public:
   }
 
   bitset_iterator& operator++() {
-    if (bit_index_ + 1 == WORD_BITS) {
+    if (bit_index_ + 1 == bitset_common::WORD_BITS) {
       bit_index_ = 0;
       ++word_ptr_;
     } else {
@@ -57,7 +57,7 @@ public:
 
   bitset_iterator& operator--() {
     if (bit_index_ == 0) {
-      bit_index_ = WORD_BITS - 1;
+      bit_index_ = bitset_common::WORD_BITS - 1;
       --word_ptr_;
     } else {
       --bit_index_;
@@ -102,7 +102,7 @@ public:
   }
 
   friend difference_type operator-(const bitset_iterator& lhs, const bitset_iterator& rhs) {
-    return (lhs.word_ptr_ - rhs.word_ptr_) * WORD_BITS + (lhs.bit_index_ - rhs.bit_index_);
+    return (lhs.word_ptr_ - rhs.word_ptr_) * bitset_common::WORD_BITS + (lhs.bit_index_ - rhs.bit_index_);
   }
 
   friend bool operator==(const bitset_iterator& lhs, const bitset_iterator& rhs) {
@@ -120,11 +120,11 @@ public:
 private:
   bitset_iterator(T* data_, difference_type bit_index)
       : word_ptr_(calc_word(data_, bit_index))
-      , bit_index_(bit_index % WORD_BITS) {}
+      , bit_index_(bit_index % bitset_common::WORD_BITS) {}
 
   T* calc_word(T* cur_word, difference_type bit_index) const {
-    T* result = cur_word + (bit_index / static_cast<difference_type>(WORD_BITS));
-    if (bit_index < 0 && bit_index % WORD_BITS != 0) {
+    T* result = cur_word + (bit_index / static_cast<difference_type>(bitset_common::WORD_BITS));
+    if (bit_index < 0 && bit_index % bitset_common::WORD_BITS != 0) {
       --result;
     }
     return result;
@@ -136,29 +136,26 @@ private:
 
   word_type get_word(std::size_t max_bits) {
     word_type result = word() >> bit_index();
-    std::size_t curr_size = WORD_BITS - bit_index();
+    std::size_t curr_size = bitset_common::WORD_BITS - bit_index();
     if (curr_size < max_bits) {
       T next_word = (*this + curr_size).word();
       result += (next_word << curr_size);
     }
-    if (max_bits < WORD_BITS) {
-      result = (result << (WORD_BITS - max_bits) >> (WORD_BITS - max_bits));
+    if (max_bits < bitset_common::WORD_BITS) {
+      result = (result << (bitset_common::WORD_BITS - max_bits) >> (bitset_common::WORD_BITS - max_bits));
     }
     return result;
   }
 
+  template <bitset_common::NonConst U = T>
   void set_word(word_type word, std::size_t bits) {
-    word_type tmp = ALL_BITS ^ ((ALL_BITS >> (WORD_BITS - bits)) << bit_index());
+    word_type tmp =
+        bitset_common::ALL_BITS ^ ((bitset_common::ALL_BITS >> (bitset_common::WORD_BITS - bits)) << bit_index());
     *word_ptr_ = (*word_ptr_ & tmp) | (word << bit_index());
-    std::size_t curr_size = WORD_BITS - bit_index();
+    std::size_t curr_size = bitset_common::WORD_BITS - bit_index();
     if (bits > curr_size) {
-      (*this + curr_size).set_word(word >> curr_size, bits + bit_index() - WORD_BITS);
+      (*this + curr_size).set_word(word >> curr_size, bits + bit_index() - bitset_common::WORD_BITS);
     }
-  }
-
-  bitset_iterator& to_next_word() {
-    *this += WORD_BITS - bit_index();
-    return *this;
   }
 
   word_type word() {

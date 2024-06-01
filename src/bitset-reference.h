@@ -1,6 +1,6 @@
 #pragma once
 
-#include "consts.h"
+#include "bitset-common.h"
 
 #include <cstddef>
 #include <iostream>
@@ -15,18 +15,21 @@ template <typename T>
 class bitset_reference {
 public:
   bitset_reference operator=(bool b) const {
-    *word_ = (*word_ & (ALL_BITS ^ (T(1) << bit_index_))) | (T(b) << bit_index_);
+    *word_ = (*word_ & (bitset_common::ALL_BITS ^ (bitset_common::ONE << bit_index_))) | (T(b) << bit_index_);
     return {word_, bit_index_};
   }
 
+  template <bitset_common::NonConst U = T>
   bitset_reference operator&=(bool b) const {
     return operator=(bool(*this) && b);
   }
 
+  template <bitset_common::NonConst U = T>
   bitset_reference operator|=(bool b) const {
     return operator=(bool(*this) || b);
   }
 
+  template <bitset_common::NonConst U = T>
   bitset_reference operator^=(bool b) const {
     return operator=(bool(*this) ^ b);
     ;
@@ -40,6 +43,7 @@ public:
     return bitset_reference(word_, bit_index_ + index);
   }
 
+  template <bitset_common::NonConst U = T>
   void flip() const {
     *word_ ^= T(1) << bit_index_;
   }
@@ -55,8 +59,8 @@ public:
 
 private:
   bitset_reference(T* data_, std::size_t bit_index)
-      : word_(data_ + bit_index / WORD_BITS)
-      , bit_index_(bit_index % WORD_BITS) {}
+      : word_(data_ + bit_index / bitset_common::WORD_BITS)
+      , bit_index_(bit_index % bitset_common::WORD_BITS) {}
 
   friend bitset;
 
