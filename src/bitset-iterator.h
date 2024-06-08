@@ -117,6 +117,19 @@ public:
     }
   }
 
+  word_type get_word(std::size_t word_num = 0, std::size_t max_bits = bitset_common::WORD_BITS) {
+    word_type result = word(word_num) >> bit_index();
+    std::size_t curr_size = bitset_common::WORD_BITS - bit_index();
+    if (curr_size < max_bits) {
+      T next_word = word(word_num + 1);
+      result += (next_word << curr_size);
+    }
+    if (max_bits < bitset_common::WORD_BITS) {
+      result = (result << (bitset_common::WORD_BITS - max_bits) >> (bitset_common::WORD_BITS - max_bits));
+    }
+    return result;
+  }
+
 private:
   bitset_iterator(T* data_, difference_type bit_index)
       : word_ptr_(calc_word(data_, bit_index))
@@ -134,36 +147,19 @@ private:
     return bit_index_;
   }
 
-  word_type get_word(std::size_t max_bits) {
-    word_type result = word() >> bit_index();
-    std::size_t curr_size = bitset_common::WORD_BITS - bit_index();
-    if (curr_size < max_bits) {
-      T next_word = (*this + curr_size).word();
-      result += (next_word << curr_size);
-    }
-    if (max_bits < bitset_common::WORD_BITS) {
-      result = (result << (bitset_common::WORD_BITS - max_bits) >> (bitset_common::WORD_BITS - max_bits));
-    }
-    return result;
-  }
-
   template <bitset_common::NonConst U = T>
-  void set_word(word_type word, std::size_t bits) {
+  void set_word(word_type value, std::size_t word_num = 0, std::size_t bits = bitset_common::WORD_BITS) {
     word_type tmp =
         bitset_common::ALL_BITS ^ ((bitset_common::ALL_BITS >> (bitset_common::WORD_BITS - bits)) << bit_index());
-    *word_ptr_ = (*word_ptr_ & tmp) | (word << bit_index());
+    word(word_num) = (word(word_num) & tmp) | (value << bit_index());
     std::size_t curr_size = bitset_common::WORD_BITS - bit_index();
     if (bits > curr_size) {
-      (*this + curr_size).set_word(word >> curr_size, bits + bit_index() - bitset_common::WORD_BITS);
+      (*this + curr_size).set_word(value >> curr_size, word_num, bits + bit_index() - bitset_common::WORD_BITS);
     }
   }
 
-  word_type word() {
-    return *word_ptr_;
-  }
-
-  T* word_ptr() {
-    return word_ptr_;
+  T& word(std::size_t word_num = 0) {
+    return word_ptr_[word_num];
   }
 
   friend class bitset;

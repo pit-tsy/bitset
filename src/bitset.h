@@ -5,11 +5,7 @@
 #include "bitset-reference.h"
 #include "bitset-view.h"
 
-#include <algorithm>
 #include <cstddef>
-#include <cstdint>
-#include <limits>
-#include <sstream>
 #include <string>
 #include <string_view>
 
@@ -74,6 +70,8 @@ public:
   const_view subview(std::size_t offset = 0, std::size_t count = npos) const;
 
 private:
+  bitset(std::size_t size);
+
   std::size_t capacity() const {
     return capacity_;
   }
@@ -81,8 +79,6 @@ private:
   word_type* data() const {
     return data_;
   }
-
-  static constexpr std::size_t WORD_BITS = sizeof(word_type) * 8;
 
 private:
   std::size_t size_;

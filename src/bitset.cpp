@@ -11,43 +11,38 @@ bitset::bitset()
     , capacity_(0)
     , data_(nullptr) {}
 
-bitset::bitset(std::size_t size, bool value)
+bitset::bitset(std::size_t size)
     : size_(size)
-    , capacity_((size + WORD_BITS - 1) / WORD_BITS)
-    , data_(empty() ? nullptr : new word_type[capacity()]) {
+    , capacity_((size + bitset_common::WORD_BITS - 1) / bitset_common::WORD_BITS)
+    , data_(empty() ? nullptr : new word_type[capacity()]) {}
+
+bitset::bitset(std::size_t size, bool value)
+    : bitset(size) {
   if (!empty()) {
     std::fill(data(), data() + capacity(), value ? -1 : 0);
   }
 }
 
 bitset::bitset(const bitset& other)
-    : size_(other.size())
-    , capacity_(other.capacity())
-    , data_(new word_type[other.capacity()]) {
+    : bitset(other.size()) {
   std::copy_n(other.data(), other.capacity(), data());
 }
 
 bitset::bitset(std::string_view str)
-    : size_(str.size())
-    , capacity_((size() + WORD_BITS - 1) / WORD_BITS)
-    , data_(empty() ? nullptr : new word_type[capacity()]{}) {
+    : bitset(str.size()) {
   for (std::size_t i = 0; i < str.size(); ++i) {
     (*this)[i] = (str[i] == '1');
   }
 }
 
 bitset::bitset(const bitset::const_view& other)
-    : size_(other.size())
-    , capacity_((size() + WORD_BITS - 1) / WORD_BITS)
-    , data_(new word_type[capacity()]) {
+    : bitset(other.size()) {
   std::copy(other.begin(), other.end(), begin());
 }
 
 bitset::bitset(bitset::const_iterator first, bitset::const_iterator last)
-    : size_(last - first)
-    , capacity_((size() + WORD_BITS - 1) / WORD_BITS)
-    , data_(new word_type[capacity()]) {
-  std::copy(first, last, begin());
+    : bitset(last - first) {
+  subview().assign(bitset_view(first, last));
 }
 
 bitset::~bitset() {
@@ -105,23 +100,17 @@ bitset::const_iterator bitset::end() const {
 }
 
 bitset& bitset::operator&=(const bitset::const_view& other) & {
-  for (std::size_t i = 0; i < size(); ++i) {
-    (*this)[i] = (*this)[i] && other[i];
-  }
+  subview() &= other.subview();
   return *this;
 }
 
 bitset& bitset::operator|=(const bitset::const_view& other) & {
-  for (std::size_t i = 0; i < size(); ++i) {
-    (*this)[i] = (*this)[i] || other[i];
-  }
+  subview() |= other.subview();
   return *this;
 }
 
 bitset& bitset::operator^=(const bitset::const_view& other) & {
-  for (std::size_t i = 0; i < size(); ++i) {
-    (*this)[i] = (*this)[i] ^ other[i];
-  }
+  subview() ^= other.subview();
   return *this;
 }
 
@@ -138,9 +127,7 @@ bitset& bitset::operator>>=(std::size_t count) & {
 
 bitset& bitset::operator<<=(std::size_t count) & {
   bitset tmp(size() + count, false);
-  for (std::size_t i = 0; i < size(); ++i) {
-    tmp[i] = bool((*this)[i]);
-  }
+  tmp.subview(0, size()).assign(subview());
   swap(tmp);
   return *this;
 }
@@ -255,10 +242,17 @@ bool operator==(const bitset::const_view& left, const bitset::const_view& right)
   if (left.size() != right.size()) {
     return false;
   }
-  for (std::size_t i = 0; i < left.size(); ++i) {
-    if (left[i] != right[i]) {
+  auto left_it = left.begin();
+  auto right_it = right.begin();
+  while (left_it != left.end()) {
+    std::size_t bits = std::min(bitset_common::WORD_BITS, static_cast<std::size_t>(left.end() - left_it));
+    auto word1 = left_it.get_word(0, bits);
+    auto word2 = right_it.get_word(0, bits);
+    if (word1 != word2) {
       return false;
     }
+    left_it += bits;
+    right_it += bits;
   }
   return true;
 }
