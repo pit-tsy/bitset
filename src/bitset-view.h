@@ -86,25 +86,20 @@ public:
   }
 
   bool all() const {
-    if (empty()) {
-      return true;
-    }
     std::size_t n = 0;
-    for (; n < words_number() - 1; ++n) {
+    for (; n + 1 < words_number(); ++n) {
       if (get_word(n) != bitset_common::ALL_BITS) {
         return false;
       }
     }
     std::size_t word_size = size() - bitset_common::WORD_BITS * n;
-    return get_word(n, word_size) == (bitset_common::ALL_BITS >> (bitset_common::WORD_BITS - word_size));
+    return word_size == 0 ||
+           get_word(n, word_size) == (bitset_common::ALL_BITS >> (bitset_common::WORD_BITS - word_size));
   }
 
   bool any() const {
-    if (empty()) {
-      return false;
-    }
     std::size_t n = 0;
-    for (; n < words_number() - 1; ++n) {
+    for (; n + 1 < words_number(); ++n) {
       if (get_word(n) != bitset_common::ZERO) {
         return true;
       }
@@ -119,12 +114,9 @@ public:
   }
 
   std::size_t count() const {
-    if (empty()) {
-      return 0;
-    }
     std::size_t result = 0;
     std::size_t n = 0;
-    for (; n < words_number() - 1; ++n) {
+    for (; n + 1 < words_number(); ++n) {
       result += std::popcount(get_word(n));
     }
     std::size_t word_size = size() - bitset_common::WORD_BITS * n;
@@ -142,9 +134,7 @@ public:
     return {begin() + offset, end()};
   }
 
-  template <typename K>
-  friend bool operator==(const const_view& left, const const_view& right);
-
+  friend bool operator==(const bitset_view<const word_type>& left, const bitset_view<const word_type>& right);
 private:
   friend class bitset;
 
@@ -152,11 +142,13 @@ private:
   friend class bitset_view;
 
   word_type get_word(std::size_t word_num = 0, std::size_t bits = bitset_common::WORD_BITS) const {
-    return empty() ? 0 : begin().get_word(word_num, bits);
+    return bits == 0 ? 0 : begin().get_word(word_num, bits);
   }
 
   void set_word(word_type value, std::size_t word_num = 0, std::size_t bits = bitset_common::WORD_BITS) const {
-    begin().set_word(value, word_num, bits);
+    if (bits > 0) {
+      begin().set_word(value, word_num, bits);
+    }
   }
 
   std::size_t words_number() const {
@@ -165,37 +157,33 @@ private:
 
   template <bitset_common::NonConst U = T, typename Func>
   view applyBinaryOp(const bitset_view<const T>& other, Func op) const {
-    if (words_number() > 0) {
-      std::size_t n = 0;
-      for (; n < words_number() - 1; ++n) {
-        auto word1 = get_word(n);
-        auto word2 = other.get_word(n);
-        set_word(op(word1, word2), n);
-      }
-      std::size_t word_size = size() - bitset_common::WORD_BITS * n;
-      auto last_word1 = get_word(n, word_size);
-      auto last_word2 = other.get_word(n, word_size);
-      set_word(op(last_word1, last_word2), n, word_size);
+    std::size_t n = 0;
+    for (; n + 1 < words_number(); ++n) {
+      auto word1 = get_word(n);
+      auto word2 = other.get_word(n);
+      set_word(op(word1, word2), n);
     }
+    std::size_t word_size = size() - bitset_common::WORD_BITS * n;
+    auto last_word1 = get_word(n, word_size);
+    auto last_word2 = other.get_word(n, word_size);
+    set_word(op(last_word1, last_word2), n, word_size);
     return *this;
   }
 
   template <bitset_common::NonConst U = T, typename Func>
   view applyUnaryOp(Func op) const {
-    if (words_number() > 0) {
-      std::size_t n = 0;
-      for (; n < words_number() - 1; ++n) {
-        auto word1 = get_word(n);
-        set_word(op(word1), n);
-      }
-      std::size_t word_size = size() - bitset_common::WORD_BITS * n;
-      auto last_word = get_word(n, word_size);
-      set_word(
-          op(last_word) << (bitset_common::WORD_BITS - word_size) >> (bitset_common::WORD_BITS - word_size),
-          n,
-          word_size
-      );
+    std::size_t n = 0;
+    for (; n + 1 < words_number(); ++n) {
+      auto word1 = get_word(n);
+      set_word(op(word1), n);
     }
+    std::size_t word_size = size() - bitset_common::WORD_BITS * n;
+    auto last_word = get_word(n, word_size);
+    set_word(
+        op(last_word) << (bitset_common::WORD_BITS - word_size) >> (bitset_common::WORD_BITS - word_size),
+        n,
+        word_size
+    );
 
     return *this;
   }

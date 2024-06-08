@@ -242,19 +242,14 @@ bool operator==(const bitset::const_view& left, const bitset::const_view& right)
   if (left.size() != right.size()) {
     return false;
   }
-  auto left_it = left.begin();
-  auto right_it = right.begin();
-  while (left_it != left.end()) {
-    std::size_t bits = std::min(bitset_common::WORD_BITS, static_cast<std::size_t>(left.end() - left_it));
-    auto word1 = left_it.get_word(0, bits);
-    auto word2 = right_it.get_word(0, bits);
-    if (word1 != word2) {
+  std::size_t n = 0;
+  for (; n + 1 < left.words_number(); ++n) {
+    if (left.get_word(n) != right.get_word(n)) {
       return false;
     }
-    left_it += bits;
-    right_it += bits;
   }
-  return true;
+  std::size_t word_size = left.size() - bitset_common::WORD_BITS * n;
+  return left.get_word(n, word_size) == right.get_word(n, word_size);
 }
 
 bool operator!=(const bitset::const_view& left, const bitset::const_view& right) {
