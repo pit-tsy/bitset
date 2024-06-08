@@ -119,13 +119,17 @@ public:
   }
 
   std::size_t count() const {
-    std::size_t cnt = 0;
-    for (auto it = begin(); it != end();) {
-      std::size_t bits = std::min(bitset_common::WORD_BITS, static_cast<std::size_t>(end() - it));
-      cnt += std::popcount(it.get_word(0, bits));
-      it += bits;
+    if (empty()) {
+      return 0;
     }
-    return cnt;
+    std::size_t result = 0;
+    std::size_t n = 0;
+    for (; n < words_number() - 1; ++n) {
+      result += std::popcount(get_word(n));
+    }
+    std::size_t word_size = size() - bitset_common::WORD_BITS * n;
+    result += std::popcount(get_word(n, word_size));
+    return result;
   }
 
   view subview(std::size_t offset = 0, std::size_t count = -1) const {
@@ -138,6 +142,7 @@ public:
     return {begin() + offset, end()};
   }
 
+  template <typename K>
   friend bool operator==(const const_view& left, const const_view& right);
 
 private:
