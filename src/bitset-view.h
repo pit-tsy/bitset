@@ -3,7 +3,6 @@
 #include "bitset-common.h"
 #include "bitset-iterator.h"
 #include "bitset-reference.h"
-#include "bitset.h"
 
 #include <bit>
 #include <cmath>
@@ -134,7 +133,13 @@ public:
     return {begin() + offset, end()};
   }
 
-  friend bool operator==(const bitset_view<const word_type>& left, const bitset_view<const word_type>& right);
+  word_type get_word(std::size_t word_num = 0, std::size_t bits = bitset_common::WORD_BITS) const {
+    return bits == 0 ? 0 : begin().get_word(word_num, bits);
+  }
+
+  std::size_t words_number() const {
+    return (size() + bitset_common::WORD_BITS - 1) / bitset_common::WORD_BITS;
+  }
 
 private:
   friend class bitset;
@@ -142,18 +147,10 @@ private:
   template <typename K>
   friend class bitset_view;
 
-  word_type get_word(std::size_t word_num = 0, std::size_t bits = bitset_common::WORD_BITS) const {
-    return bits == 0 ? 0 : begin().get_word(word_num, bits);
-  }
-
   void set_word(word_type value, std::size_t word_num = 0, std::size_t bits = bitset_common::WORD_BITS) const {
     if (bits > 0) {
       begin().set_word(value, word_num, bits);
     }
-  }
-
-  std::size_t words_number() const {
-    return (size() + bitset_common::WORD_BITS - 1) / bitset_common::WORD_BITS;
   }
 
   template <bitset_common::NonConst U = T, typename Func>

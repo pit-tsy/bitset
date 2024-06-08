@@ -122,7 +122,7 @@ public:
     std::size_t curr_size = bitset_common::WORD_BITS - bit_index();
     if (curr_size < max_bits) {
       T next_word = word(word_num + 1);
-      result += (next_word << curr_size);
+      '' result += (next_word << curr_size);
     }
     if (max_bits < bitset_common::WORD_BITS) {
       result = (result << (bitset_common::WORD_BITS - max_bits) >> (bitset_common::WORD_BITS - max_bits));
