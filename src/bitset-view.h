@@ -170,19 +170,20 @@ private:
 
   template <bitset_common::NonConst U = T, typename Func>
   view applyUnaryOp(Func op) const {
-    std::size_t n = 0;
-    for (; n + 1 < words_number(); ++n) {
-      auto word1 = get_word(n);
-      set_word(op(word1), n);
+    if (!empty()) {
+      std::size_t n = 0;
+      for (; n + 1 < words_number(); ++n) {
+        auto word1 = get_word(n);
+        set_word(op(word1), n);
+      }
+      std::size_t word_size = size() - bitset_common::WORD_BITS * n;
+      auto last_word = get_word(n, word_size);
+      set_word(
+          op(last_word) << (bitset_common::WORD_BITS - word_size) >> (bitset_common::WORD_BITS - word_size),
+          n,
+          word_size
+      );
     }
-    std::size_t word_size = size() - bitset_common::WORD_BITS * n;
-    auto last_word = get_word(n, word_size);
-    set_word(
-        op(last_word) << (bitset_common::WORD_BITS - word_size) >> (bitset_common::WORD_BITS - word_size),
-        n,
-        word_size
-    );
-
     return *this;
   }
 
