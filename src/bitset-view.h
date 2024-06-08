@@ -135,6 +135,7 @@ public:
   }
 
   friend bool operator==(const bitset_view<const word_type>& left, const bitset_view<const word_type>& right);
+
 private:
   friend class bitset;
 
